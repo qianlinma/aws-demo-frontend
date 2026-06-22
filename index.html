@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Demo Products</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="page">
+      <section class="header">
+        <div>
+          <p class="eyebrow">AWS Demo</p>
+          <h1>Products</h1>
+        </div>
+        <button id="refreshButton" type="button">Refresh</button>
+      </section>
+
+      <section id="status" class="status">Loading products...</section>
+      <section id="products" class="products" aria-live="polite"></section>
+    </main>
+
+    <script src="./app.js"></script>
+  </body>
+</html>
