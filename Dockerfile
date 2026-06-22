@@ -1,5 +1,6 @@
 FROM nginx:1.27-alpine
 
+# CI trigger check for frontend pipeline.
 # 拷贝最小前端静态文件到 Nginx 默认站点目录。
 COPY index.html /usr/share/nginx/html/index.html
 COPY styles.css /usr/share/nginx/html/styles.css
