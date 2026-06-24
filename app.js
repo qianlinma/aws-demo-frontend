@@ -26,15 +26,35 @@ async function loadProducts() {
       return;
     }
 
-    statusElement.textContent = `${products.length} products loaded.`;
-    productsElement.replaceChildren(...products.map(renderProduct));
+    statusElement.textContent = `Loading inventory and user data for ${products.length} products...`;
+
+    const productDetails = await Promise.all(
+      products.map((product) => loadProductDetails(product))
+    );
+
+    statusElement.textContent = `${products.length} products loaded with inventory and user data.`;
+    productsElement.replaceChildren(...productDetails.map(renderProduct));
   } catch (error) {
     statusElement.textContent = `Failed to load products. ${error.message}`;
     statusElement.classList.add("error");
   }
 }
 
-function renderProduct(product) {
+async function loadProductDetails(product) {
+  const response = await fetch(`${API_BASE_URL}/api/products/${product.id}/details`);
+
+  if (!response.ok) {
+    throw new Error(`Details request failed for product ${product.id}: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+function renderProduct(productDetails) {
+  const product = productDetails.product ?? {};
+  const inventory = productDetails.inventory ?? {};
+  const userProfile = productDetails.userProfile ?? {};
+
   const article = document.createElement("article");
   article.className = "product";
 
@@ -49,8 +69,32 @@ function renderProduct(product) {
   const path = document.createElement("p");
   path.textContent = product.path ?? "";
 
-  article.append(image, title, path);
+  const meta = document.createElement("dl");
+  meta.className = "product-meta";
+
+  appendMeta(meta, "Inventory", formatInventory(inventory));
+  appendMeta(meta, "Warehouse", inventory.warehouseRegion ?? "unknown");
+  appendMeta(meta, "Member", userProfile.name ?? "unknown");
+  appendMeta(meta, "Level", userProfile.membershipLevel ?? "unknown");
+  appendMeta(meta, "Region", userProfile.region ?? "unknown");
+
+  article.append(image, title, path, meta);
   return article;
+}
+
+function appendMeta(container, label, value) {
+  const term = document.createElement("dt");
+  term.textContent = label;
+
+  const description = document.createElement("dd");
+  description.textContent = value;
+
+  container.append(term, description);
+}
+
+function formatInventory(inventory) {
+  const quantity = inventory.quantityAvailable ?? 0;
+  return inventory.available ? `${quantity} available` : "Out of stock";
 }
 
 refreshButton.addEventListener("click", loadProducts);
